@@ -30,19 +30,22 @@ The layout adapts to desktop, tablet, and mobile widths. Links and controls reta
 |---|---|
 | UI | React 19, Tailwind CSS v4 |
 | Build | Vite 8 |
-| Contact API | Node.js server endpoint forwarding validated inquiries to Fruitask |
+| Contact API | Node.js locally and a Cloudflare Worker in production, forwarding validated inquiries to Fruitask |
 | Icons | Lucide React, React Icons |
 | In-view transitions | react-intersection-observer |
-| Project data | Fruitask REST API with local fallback data |
+| Project data | Server-side Fruitask REST API with local fallback data |
 | Checks | oxlint, Vitest, Testing Library |
 
 - `src/App.jsx`: page shell, navigation, and pointer-driven background coordinates.
 - `src/index.css`: color tokens, glass surfaces, section layouts, responsive rules, and reduced-motion styles.
 - `src/components/`: the visible page sections, theme toggle, project carousel, and image lightbox.
 - `src/data/`: services, tech stack, fallback projects, and site links.
-- `src/services/fruitask.js`: Fruitask project fetching and data mapping.
+- `src/services/fruitask.js`: same-origin project fetching without browser credentials.
+- `server/projects.js`: private Fruitask project fetching and display-data mapping.
 - `server/contact.js`: Contact validation and server-only Fruitask row creation.
-- `server/index.js`: Node.js HTTP server for `/api/contact` and the production build.
+- `server/index.js`: Node.js HTTP server for `/api/contact`, `/api/projects`, and the production build.
+- `worker/index.js`: Cloudflare Worker routes for `/api/contact` and `/api/projects`, with static assets served from `dist/`.
+- `wrangler.jsonc`: Cloudflare Worker deployment and static asset routing.
 - `src/main.jsx`: applies a saved dark theme before React renders.
 - `public/profile.jpg`: profile photo used in the header, About section, and footer.
 
@@ -53,17 +56,32 @@ npm install
 npm run dev
 ```
 
-`npm run dev` starts Vite and the local contact API together. For a production Node deployment, run `npm run build` and then `npm start`. Route the public `/api/contact` path to this Node server; a static-only deployment cannot process form submissions.
+`npm run dev` starts Vite and the local contact API together. For a production Node deployment, run `npm run build` and then `npm start`. Cloudflare Workers uses `worker/index.js` for the same `/api/contact` path.
 
 Checks:
 
 ```bash
 npm run lint
 npx vitest run
+npm run test:contact
+npm run test:projects
+npm run test:worker
 npm run build
 ```
 
-`npm run preview` only previews the static build, so its contact form cannot reach the Node API. Use `npm start` to inspect the complete production flow.
+`npm run preview` only previews the static build, so its contact form cannot reach the Node API. Use `npm start` to inspect the complete local production flow.
+
+## Deploy to Cloudflare Workers
+
+The Wrangler CLI is pinned in `package-lock.json`, and `wrangler.jsonc` deploys the Vite build plus the Contact API Worker under the existing `website-profile` Worker name. Cloudflare Workers Builds should use `npm run build` as the build command and `npx wrangler deploy` as the deploy command. The equivalent local commands are:
+
+```bash
+npm ci
+npm run build
+npx wrangler deploy
+```
+
+Before using live Contact and Projects data, add `FRUITASK_API_KEY`, `FRUITASK_WORKSPACE_TOKEN`, and `FRUITASK_PROJECTS_WORKSPACE_TOKEN` as **runtime secrets** on the `website-profile` Worker in Cloudflare's Variables and Secrets settings. Add `FRUITASK_TABLE_NAME` there as a runtime variable with the exact Contact table API name. The local `.env` is ignored by Git and is not deployed. If the Contact bindings are missing, the Worker returns a configuration error to the form without exposing credentials. If Projects bindings are missing, the existing fallback projects are displayed. Do not put credentials in Cloudflare build variables or `wrangler.jsonc`.
 
 ## Theme and motion
 
@@ -73,25 +91,17 @@ The CSS uses short transitions and honors `prefers-reduced-motion`. The scroll-d
 
 ## Fruitask integration
 
-The Projects section tries to load live rows through `src/services/fruitask.js`. If the request fails, returns no projects, or the configuration is absent, it uses `src/data/projects.js`.
+The Projects section loads display-only project data from the same-origin `/api/projects` route. The Node server and Cloudflare Worker call Fruitask with private credentials. If the request fails, returns no projects, or the configuration is absent, the section uses `src/data/projects.js`.
 
-The Contact form submits to the same-origin Node endpoint at `/api/contact`. Configure these **server-side** environment variables in a local `.env` file or your Node host:
+The Contact form submits to the same-origin `/api/contact` endpoint, served by Node.js locally or the Worker on Cloudflare. Configure these **server-side** environment variables in a local `.env` file, your Node host, or the Cloudflare Worker's runtime settings:
 
 ```env
 FRUITASK_API_KEY=your_private_key
 FRUITASK_WORKSPACE_TOKEN=your_workspace_token
 FRUITASK_TABLE_NAME=your_table_api_name
+FRUITASK_PROJECTS_WORKSPACE_TOKEN=your_projects_workspace_token
 ```
 
 The contact form writes only `Name`, `Email`, `Subject`, and `Message` to the matching Fruitask columns. `Status` and `Date Received` stay managed by the table, so visitors do not fill them in. There is no Budget Range field or column. No Fruitask credential is sent to the React client. Until the server variables are configured, submissions return a clear error and the email and WhatsApp contact links remain available. Live table writes have not been tested without the real credentials.
 
-For local project fetching, the code reads these optional Vite environment variables:
-
-```env
-VITE_FRUITASK_API_KEY=your_key
-VITE_FRUITASK_TOKEN=your_token
-```
-
-Values prefixed with `VITE_` are exposed in the browser bundle. Do not use private or unrestricted credentials there. Local requests may also be blocked by the Fruitask CORS policy; the fallback projects remain available.
-
-The existing project-list integration above is separate from the new contact API. If its `VITE_` values are private credentials, remove them from any client environment and migrate that project fetch to a server endpoint before deploying.
+The Projects and Contact workspace tokens can differ. Neither token nor the API key is read by the React frontend. Rotate any credentials previously deployed in `VITE_` variables, since older browser bundles may still contain them.

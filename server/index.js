@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { handleContact } from './contact.js';
+import { handleProjects } from './projects.js';
 
 const projectRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const distRoot = resolve(projectRoot, 'dist');
@@ -26,6 +27,10 @@ const server = createServer(async (request, response) => {
   const pathname = new URL(request.url, 'http://localhost').pathname;
   if (pathname === '/api/contact') {
     await handleContact(request, response);
+    return;
+  }
+  if (pathname === '/api/projects') {
+    await handleProjects(request, response);
     return;
   }
   if (request.method !== 'GET' && request.method !== 'HEAD') {
