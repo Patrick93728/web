@@ -70,7 +70,7 @@ function App() {
           <div className="header-actions">
             <ThemeToggle />
             <details className="mobile-nav">
-              <summary aria-label="Open navigation menu"><span /><span /></summary>
+              <summary aria-label="Toggle navigation menu"><span /><span /></summary>
               <nav aria-label="Mobile navigation">
                 {navigation.map(({ label, href }) => (
                   <a key={href} href={href} onClick={(event) => event.currentTarget.closest('details').open = false}>{label}</a>

@@ -15,7 +15,7 @@ export const techStack = [
     items: [
       { name: 'Flutter', icon: "/LOGO's/flutter-svgrepo-com.svg" },
       { name: 'Dart', icon: "/LOGO's/dart-svgrepo-com.svg" },
-      { name: 'React Native', icon: "/LOGO's/mobile-svgrepo-com.svg" },
+      { name: 'React Native', icon: "/LOGO's/react-svgrepo-com.svg" },
       { name: 'Expo', icon: "/LOGO's/expo-icon-svgrepo-com.svg" },
     ],
   },
@@ -24,6 +24,7 @@ export const techStack = [
     items: [
       { name: 'PHP', icon: "/LOGO's/php-svgrepo-com.svg" },
       { name: 'Python', icon: "/LOGO's/python-svgrepo-com.svg" },
+      { name: 'Node.js', icon: "/LOGO's/node.com.svg" },
       { name: 'REST APIs', icon: '🔌' },
       { name: 'MySQL', icon: "/LOGO's/mysql-svgrepo-com.svg" },
       { name: 'Firebase', icon: "/LOGO's/firebase-svgrepo-com.svg" },

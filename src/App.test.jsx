@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import App from './App';
 
+vi.mock('./services/fruitask', () => ({ fetchProjectsFromFruitask: vi.fn().mockResolvedValue([]) }));
+
 class MockIntersectionObserver {
   observe = vi.fn();
   unobserve = vi.fn();
@@ -42,7 +44,7 @@ describe('App', () => {
 
   it('renders the Contact heading', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { name: /Let's work together\./i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /HAVE A PROJECT/i })).toBeInTheDocument();
   });
 
   it('renders Contact Me button linking to Patrick\'s email', () => {
@@ -52,10 +54,21 @@ describe('App', () => {
     expect(contactLink.getAttribute('href')).toBe('mailto:tomolpatrick@gmail.com');
   });
 
-  it('renders the fruitask contact form iframe', () => {
+  it('renders the contact form without the old iframe', () => {
     render(<App />);
-    const iframe = document.querySelector('iframe[src*="fruitask.com"]');
-    expect(iframe).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Project inquiry' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Subject Select a subject/i })).toBeInTheDocument();
+    expect(screen.getByLabelText('Message')).toBeInTheDocument();
+    expect(screen.queryByText(/Budget Range/i)).toBeNull();
+    expect(document.querySelector('iframe[src*="fruitask.com"]')).toBeNull();
+  });
+
+  it('uses the configured address for both Contact and footer email links', () => {
+    render(<App />);
+    expect(document.querySelector('#contact .contact-method')).toHaveAttribute('href', 'mailto:tomolpatrick@gmail.com');
+    expect(screen.getByRole('link', { name: 'Send an email' })).toHaveAttribute('href', 'mailto:tomolpatrick@gmail.com');
   });
 
   it('renders Patrick Tomol name in footer', () => {
