@@ -8,7 +8,6 @@ export const projects = [
     technologies: ['Flutter', 'Dart', 'Fruitask'],
     image: 'https://fileko.fruitask.com/files/a759f329-7911-45a8-b74e-ab349e05a0ac',
     images: ['https://fileko.fruitask.com/files/a759f329-7911-45a8-b74e-ab349e05a0ac'],
-    repoUrl: 'https://github.com/Patrick93728/Attendly',
     liveUrl: 'https://fileko.fruitask.com/files/Df03',
   },
   {
@@ -20,7 +19,6 @@ export const projects = [
     technologies: ['React', 'Node.js', 'Fruitask'],
     image: 'https://fileko.fruitask.com/files/db3ae641-1da9-4a46-bef2-b3210df695f4',
     images: ['https://fileko.fruitask.com/files/db3ae641-1da9-4a46-bef2-b3210df695f4'],
-    repoUrl: 'https://github.com/Patrick93728',
     liveUrl: 'https://www.uptura-tech.com/#/',
   },
   {
@@ -32,7 +30,6 @@ export const projects = [
     technologies: ['Vue.js', 'Node.js', 'MongoDB'],
     image: 'https://fileko.fruitask.com/files/348f2e8c-3e4d-44b1-9e81-52de36bde5c3',
     images: ['https://fileko.fruitask.com/files/348f2e8c-3e4d-44b1-9e81-52de36bde5c3'],
-    repoUrl: null,
     liveUrl: 'https://fruitask.com/',
   },
   {
@@ -44,7 +41,6 @@ export const projects = [
     technologies: ['Vue.js', 'Node.js', 'MongoDB'],
     image: 'https://fileko.fruitask.com/files/d45f4355-530f-4149-a1bf-225c9beff7b7',
     images: ['https://fileko.fruitask.com/files/d45f4355-530f-4149-a1bf-225c9beff7b7'],
-    repoUrl: null,
     liveUrl: 'https://fruitask.com/',
   }
 ];

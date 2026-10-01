@@ -39,7 +39,6 @@ export function mapProjectRows(rows) {
       images,
       image: images[0] || null,
       liveUrl: webUrl(getVal('Live Demo Link')),
-      repoUrl: webUrl(getVal('Repository Link')),
     };
   }).filter((project) => project.title);
 }

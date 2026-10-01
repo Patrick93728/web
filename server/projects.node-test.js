@@ -25,7 +25,6 @@ test('maps only project display fields from Fruitask rows', () => {
     images: ['https://example.com/attendly.png'],
     image: 'https://example.com/attendly.png',
     liveUrl: 'https://example.com/demo',
-    repoUrl: null,
   }]);
 });
 
@@ -40,9 +39,7 @@ test('keeps projects when repository cells are missing, null, empty, or present'
   }));
   const projects = mapProjectRows(rows);
   assert.equal(projects.length, rows.length);
-  assert.deepEqual(projects.map((project) => project.repoUrl), [
-    null, null, null, null, 'https://github.com/example/project',
-  ]);
+  assert.ok(projects.every((project) => !Object.hasOwn(project, 'repoUrl')));
 });
 
 test('skips malformed rows while keeping valid projects and safe links', () => {
@@ -57,7 +54,7 @@ test('skips malformed rows while keeping valid projects and safe links', () => {
     } },
   ]);
   assert.equal(projects.length, 1);
-  assert.equal(projects[0].repoUrl, null);
+  assert.equal(Object.hasOwn(projects[0], 'repoUrl'), false);
   assert.equal(projects[0].liveUrl, 'https://example.com/demo');
   assert.deepEqual(projects[0].technologies, ['React', 'Node.js']);
 });

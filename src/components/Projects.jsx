@@ -1,8 +1,8 @@
 ﻿import { useInView } from 'react-intersection-observer';
 import { ExternalLink, ImageOff, X, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
-import { FaGithub } from 'react-icons/fa';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchProjectsFromFruitask } from '../services/fruitask';
+import { projects as fallbackProjects } from '../data/projects';
 
 // â”€â”€ Lightbox â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Lightbox({ images, startIndex, onClose }) {
@@ -93,7 +93,6 @@ function ProjectCard({ project, onImageClick }) {
     ? project.images
     : project.image ? [project.image] : [];
   const hasImages = allImages.length > 0;
-  const repositoryUrl = typeof project.repoUrl === 'string' ? project.repoUrl.trim() : '';
 
   return (
     <div className="project-card">
@@ -167,28 +166,16 @@ function ProjectCard({ project, onImageClick }) {
           )}
 
           {/* Links */}
-          {(project.liveUrl || repositoryUrl) && (
+          {project.liveUrl && (
             <div className="project-actions flex gap-4 mt-auto pt-3 border-t border-slate-100 dark:border-zinc-700/50">
-              {project.liveUrl && (
-                <a
-                  href={project.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm md:text-base font-semibold text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white transition-colors"
-                >
-                  <ExternalLink size={13} aria-hidden="true" /> Live Demo
-                </a>
-              )}
-              {repositoryUrl && (
-                <a
-                  href={repositoryUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm md:text-base font-medium text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors ml-auto"
-                >
-                  <FaGithub size={13} aria-hidden="true" /> Repository
-                </a>
-              )}
+              <a
+                href={project.liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm md:text-base font-semibold text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                <ExternalLink size={13} aria-hidden="true" /> Live Demo
+              </a>
             </div>
           )}
         </div>
@@ -202,8 +189,6 @@ export default function Projects() {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.05 });
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [requestVersion, setRequestVersion] = useState(0);
   const [lightbox, setLightbox] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const sectionRef = useRef(null);
@@ -213,15 +198,12 @@ export default function Projects() {
   useEffect(() => {
     const controller = new AbortController();
     const loadProjects = async () => {
-      setLoading(true);
-      setError(false);
       try {
         const liveProjects = await fetchProjectsFromFruitask(controller.signal);
         if (!controller.signal.aborted) setProjects(liveProjects);
       } catch {
         if (!controller.signal.aborted) {
-          setProjects([]);
-          setError(true);
+          setProjects(fallbackProjects);
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -229,7 +211,7 @@ export default function Projects() {
     };
     loadProjects();
     return () => controller.abort();
-  }, [requestVersion]);
+  }, []);
 
   useEffect(() => {
     if (loading || projects.length < 2) return;
@@ -330,11 +312,6 @@ export default function Projects() {
           {loading ? (
             <div className="flex justify-center items-center py-16">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-300 dark:border-zinc-600" />
-            </div>
-          ) : error ? (
-            <div role="alert" className="glass-panel rounded-xl px-6 py-8 text-center text-slate-600 dark:text-zinc-300">
-              <p>Projects are temporarily unavailable.</p>
-              <button type="button" onClick={() => setRequestVersion((version) => version + 1)} className="mt-4 text-sm font-semibold underline underline-offset-4 hover:text-slate-900 dark:hover:text-white">Try again</button>
             </div>
           ) : projects.length === 0 ? (
             <p className="text-sm text-slate-400 dark:text-zinc-500 py-8">No projects found.</p>

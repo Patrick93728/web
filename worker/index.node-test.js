@@ -84,8 +84,7 @@ test('returns 200 with projects that have no repository cell', async () => {
     assert.equal(response.status, 200);
     const { projects } = await response.json();
     assert.equal(projects.length, 2);
-    assert.equal(projects[0].repoUrl, 'https://github.com/example/project');
-    assert.equal(projects[1].repoUrl, null);
+    assert.ok(projects.every((project) => !Object.hasOwn(project, 'repoUrl')));
   } finally {
     globalThis.fetch = originalFetch;
   }

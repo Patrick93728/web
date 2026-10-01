@@ -33,13 +33,13 @@ The layout adapts to desktop, tablet, and mobile widths. Links and controls reta
 | Contact API | Node.js locally and a Cloudflare Worker in production, forwarding validated inquiries to Fruitask |
 | Icons | Lucide React, React Icons |
 | In-view transitions | react-intersection-observer |
-| Project data | Server-side Fruitask REST API with a retry state when unavailable |
+| Project data | Server-side Fruitask REST API with the existing project list as a fallback |
 | Checks | oxlint, Vitest, Testing Library |
 
 - `src/App.jsx`: page shell, navigation, and pointer-driven background coordinates.
 - `src/index.css`: color tokens, glass surfaces, section layouts, responsive rules, and reduced-motion styles.
 - `src/components/`: the visible page sections, theme toggle, project carousel, and image lightbox.
-- `src/data/`: services, tech stack, site links, and the original static project list (not rendered by Projects).
+- `src/data/`: services, tech stack, site links, and the existing project list used when the API is unavailable.
 - `src/services/fruitask.js`: same-origin project fetching without browser credentials.
 - `server/projects.js`: private Fruitask project fetching and display-data mapping.
 - `server/contact.js`: Contact validation and server-only Fruitask row creation.
@@ -81,7 +81,7 @@ npm run build
 npx wrangler deploy
 ```
 
-Before using live Contact and Projects data, add `FRUITASK_API_KEY`, `FRUITASK_WORKSPACE_TOKEN`, and `FRUITASK_PROJECTS_WORKSPACE_TOKEN` as **runtime secrets** on the `web` Worker in Cloudflare's Variables and Secrets settings. Add `FRUITASK_TABLE_NAME` there as a runtime variable with the exact Contact table API name. The local `.env` is ignored by Git and is not deployed. If Projects bindings are missing, `/api/projects` returns 503 and the page shows a retry state without stale project links; if Contact bindings are missing, the Worker returns a configuration error to the form without exposing credentials. Do not put credentials in Cloudflare build variables or `wrangler.jsonc`.
+Before using live Contact and Projects data, add `FRUITASK_API_KEY`, `FRUITASK_WORKSPACE_TOKEN`, and `FRUITASK_PROJECTS_WORKSPACE_TOKEN` as **runtime secrets** on the `web` Worker in Cloudflare's Variables and Secrets settings. Add `FRUITASK_TABLE_NAME` there as a runtime variable with the exact Contact table API name. The local `.env` is ignored by Git and is not deployed. If Projects bindings are missing, `/api/projects` returns 503 and the page shows the existing projects from `src/data/projects.js`; if Contact bindings are missing, the Worker returns a configuration error to the form without exposing credentials. Do not put credentials in Cloudflare build variables or `wrangler.jsonc`.
 
 ## Theme and motion
 
@@ -91,7 +91,7 @@ The CSS uses short transitions and honors `prefers-reduced-motion`. The scroll-d
 
 ## Fruitask integration
 
-The Projects section loads display-only project data from the same-origin `/api/projects` route on each page load. The request bypasses the browser cache, and API responses use `Cache-Control: no-store`. The Node server and Cloudflare Worker call Fruitask with private credentials. A missing optional repository link maps to `null` and does not prevent other projects from loading. If the request fails, the page offers a retry instead of displaying bundled project links that may be stale.
+The Projects section loads display-only project data from the same-origin `/api/projects` route on each page load. The request bypasses the browser cache, and API responses use `Cache-Control: no-store`. The Node server and Cloudflare Worker call Fruitask with private credentials. Repository links are not included in the API response or shown on project cards; Live Demo remains the only project action. If the request fails, the existing four project cards from `src/data/projects.js` remain visible with their existing Live Demo links.
 
 The Contact form submits to the same-origin `/api/contact` endpoint, served by Node.js locally or the Worker on Cloudflare. Configure these **server-side** environment variables in a local `.env` file, your Node host, or the Cloudflare Worker's runtime settings:
 
