@@ -45,6 +45,23 @@ test('keeps projects when repository cells are missing, null, empty, or present'
   ]);
 });
 
+test('skips malformed rows while keeping valid projects and safe links', () => {
+  const projects = mapProjectRows([
+    null,
+    { id: 'missing-title', cells: { 'Repository Link': { value: 'https://github.com/example/old' } } },
+    { id: 'valid', cells: {
+      Title: { value: 'Current project' },
+      'Repository Link': { value: 'javascript:alert(1)' },
+      'Live Demo Link': { value: 'https://example.com/demo' },
+      Technologies: { value: 'React, , Node.js' },
+    } },
+  ]);
+  assert.equal(projects.length, 1);
+  assert.equal(projects[0].repoUrl, null);
+  assert.equal(projects[0].liveUrl, 'https://example.com/demo');
+  assert.deepEqual(projects[0].technologies, ['React', 'Node.js']);
+});
+
 test('fetches project rows with server-only credentials', async () => {
   let outgoing;
   const projects = await loadProjects({
@@ -62,4 +79,23 @@ test('fetches project rows with server-only credentials', async () => {
 
 test('reports missing project credentials without exposing values', async () => {
   await assert.rejects(loadProjects({}), (error) => error instanceof ProjectsError && error.status === 503);
+});
+
+test('treats malformed upstream JSON as an upstream failure', async () => {
+  const env = { FRUITASK_API_KEY: 'test-only-key', FRUITASK_PROJECTS_WORKSPACE_TOKEN: 'test-only-token' };
+  await assert.rejects(loadProjects(env, async () => ({ ok: true, json: async () => ({ data: {} }) })),
+    (error) => error instanceof ProjectsError && error.status === 502);
+  await assert.rejects(loadProjects(env, async () => ({ ok: true, json: async () => { throw new SyntaxError('bad JSON'); } })),
+    (error) => error instanceof ProjectsError && error.status === 502);
+});
+
+test('reports upstream HTTP and network failures without returning credentials', async () => {
+  const env = { FRUITASK_API_KEY: 'test-only-key', FRUITASK_PROJECTS_WORKSPACE_TOKEN: 'test-only-token' };
+  for (const fetchRequest of [
+    async () => ({ ok: false, status: 500 }),
+    async () => { throw new Error('network failure'); },
+  ]) {
+    await assert.rejects(loadProjects(env, fetchRequest), (error) =>
+      error instanceof ProjectsError && error.status === 502 && !error.message.includes(env.FRUITASK_API_KEY));
+  }
 });

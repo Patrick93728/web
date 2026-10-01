@@ -174,8 +174,15 @@ main section:not(#home) > .section-container > div:first-child { margin-bottom: 
 #projects .project-controls button:disabled { opacity: .35; cursor: not-allowed; }
 #projects .projects-viewport { overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; }
 #projects .projects-viewport::-webkit-scrollbar { display: none; }
-#projects .projects-track { display: flex; gap: 20px; width: max-content; padding-right: 20px; }
+#projects .projects-track { display: flex; align-items: stretch; gap: 20px; width: max-content; padding-right: 20px; }
 #projects .projects-track > div { flex: 0 0 clamp(360px, 45vw, 580px); width: clamp(360px, 45vw, 580px); scroll-snap-align: start; }
+#projects .project-card { display: flex; min-width: 0; }
+#projects .project-card article { flex: 1; min-width: 0; }
+#projects .project-card-content { min-width: 0; }
+#projects .project-description { overflow-wrap: anywhere; }
+#projects .project-tags { margin-top: auto; }
+#projects .project-actions { flex-wrap: wrap; }
+#projects .project-tags + .project-actions { margin-top: 0; }
 #projects.is-scroll-driven { padding-block: 0; }
 #projects.is-scroll-driven .project-stage { position: sticky; top: 76px; height: calc(100svh - 76px); display: flex; flex-direction: column; justify-content: center; padding-block: 22px; }
 #projects.is-scroll-driven .projects-viewport { overflow: hidden; flex: 0 1 auto; scroll-snap-type: none; }
@@ -189,7 +196,7 @@ main section:not(#home) > .section-container > div:first-child { margin-bottom: 
 #projects article > div:last-child > div:first-child > span:last-child { color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 2px; font-size: 10px; }
 #projects h3 { color: var(--ink); font-size: 22px; letter-spacing: -.05em; }
 #projects h3 + p { color: var(--muted); font-size: 13px; line-height: 1.65; }
-#projects article > div:last-child > div:nth-last-child(2) span { background: var(--paper); border: 1px solid var(--line); color: var(--muted); border-radius: 2px; }
+#projects .project-tags span { background: var(--paper); border: 1px solid var(--line); color: var(--muted); border-radius: 2px; }
 #projects article a { color: var(--ink); font-size: 12px; }
 #projects article a:hover { text-decoration: underline; }
 #projects article > div:last-child > div:last-child { border-color: var(--line); }

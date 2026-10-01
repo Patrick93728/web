@@ -1,10 +1,7 @@
-export const fetchProjectsFromFruitask = async () => {
-  try {
-    const response = await fetch('/api/projects');
-    if (!response.ok) return [];
-    const result = await response.json();
-    return Array.isArray(result.projects) ? result.projects : [];
-  } catch {
-    return [];
-  }
+export const fetchProjectsFromFruitask = async (signal) => {
+  const response = await fetch('/api/projects', { cache: 'no-store', signal });
+  if (!response.ok) throw new Error('Projects are unavailable.');
+  const result = await response.json();
+  if (!Array.isArray(result?.projects)) throw new Error('Projects response is invalid.');
+  return result.projects;
 };

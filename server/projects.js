@@ -5,28 +5,43 @@ export class ProjectsError extends Error {
   }
 }
 
+function textValue(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function webUrl(value) {
+  const url = textValue(value);
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 export function mapProjectRows(rows) {
   if (!Array.isArray(rows)) return [];
-  return rows.filter((row) => row && typeof row === 'object').map((row) => {
+  return rows.filter((row) => row && typeof row === 'object').map((row, index) => {
     const cells = row.cells && typeof row.cells === 'object' ? row.cells : {};
     const getVal = (name) => cells[name]?.value;
     const imageVal = getVal('image');
-    const images = Array.isArray(imageVal) ? imageVal.map((image) => image?.url).filter(Boolean) : [];
-    const repository = getVal('Repository Link');
+    const images = Array.isArray(imageVal) ? imageVal.map((image) => webUrl(image?.url)).filter(Boolean) : [];
+    const title = textValue(getVal('Title'));
     return {
-      id: getVal('Project ID') || row.id,
-      title: getVal('Title') || 'Untitled Project',
-      summary: getVal('Description') || '',
+      id: textValue(getVal('Project ID')) || row.id || `project-${index}`,
+      title,
+      summary: textValue(getVal('Description')),
       category: 'Development',
       status: 'Completed',
-      role: getVal('Role') || null,
-      technologies: getVal('Technologies') ? String(getVal('Technologies')).split(',').map((tech) => tech.trim()) : [],
+      role: textValue(getVal('Role')) || null,
+      technologies: textValue(getVal('Technologies')).split(',').map((tech) => tech.trim()).filter(Boolean),
       images,
       image: images[0] || null,
-      liveUrl: getVal('Live Demo Link') || null,
-      repoUrl: typeof repository === 'string' ? repository.trim() || null : null,
+      liveUrl: webUrl(getVal('Live Demo Link')),
+      repoUrl: webUrl(getVal('Repository Link')),
     };
-  }).filter((project) => project.title !== 'Untitled Project');
+  }).filter((project) => project.title);
 }
 
 export async function loadProjects(env = process.env, fetchRequest = fetch) {
@@ -45,7 +60,13 @@ export async function loadProjects(env = process.env, fetchRequest = fetch) {
     throw new ProjectsError(502, 'Project data is unavailable.');
   }
   if (!response.ok) throw new ProjectsError(502, 'Project data is unavailable.');
-  const result = await response.json();
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new ProjectsError(502, 'Project data is unavailable.');
+  }
+  if (!Array.isArray(result?.data?.rows)) throw new ProjectsError(502, 'Project data is unavailable.');
   return mapProjectRows(result.data?.rows);
 }
 

@@ -3,7 +3,6 @@ import { ExternalLink, ImageOff, X, ChevronLeft, ChevronRight, Eye } from 'lucid
 import { FaGithub } from 'react-icons/fa';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchProjectsFromFruitask } from '../services/fruitask';
-import { projects as fallbackProjects } from '../data/projects';
 
 // â”€â”€ Lightbox â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Lightbox({ images, startIndex, onClose }) {
@@ -97,7 +96,7 @@ function ProjectCard({ project, onImageClick }) {
   const repositoryUrl = typeof project.repoUrl === 'string' ? project.repoUrl.trim() : '';
 
   return (
-    <div className="h-full">
+    <div className="project-card">
       <article className="glass-panel glass-panel-hover rounded-2xl h-full flex flex-col overflow-hidden group/card">
 
         {/* Image area â€” hover shows "View Image" overlay */}
@@ -135,7 +134,7 @@ function ProjectCard({ project, onImageClick }) {
         </div>
 
         {/* Content */}
-        <div className="p-5 flex flex-col gap-3 flex-1">
+        <div className="project-card-content p-5 flex flex-col gap-3 flex-1">
           {/* Category + Role badges */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm md:text-base font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">
@@ -149,7 +148,7 @@ function ProjectCard({ project, onImageClick }) {
           </div>
 
           {/* Title + Description */}
-          <div className="group/desc">
+          <div className="project-description group/desc">
             <h3 className="font-bold text-slate-800 dark:text-zinc-100 text-xl leading-snug mb-1.5">{project.title}</h3>
             <p className="text-lg md:text-xl text-slate-500 dark:text-zinc-400 leading-relaxed transition-colors duration-200 group-hover/desc:text-slate-700 dark:group-hover/desc:text-zinc-300">
               {project.summary}
@@ -158,7 +157,7 @@ function ProjectCard({ project, onImageClick }) {
 
           {/* Tech pills */}
           {project.technologies && project.technologies.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="project-tags flex flex-wrap gap-1.5">
               {project.technologies.map((tech) => (
                 <span key={tech} className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-zinc-700 text-slate-500 dark:text-zinc-400">
                   {tech}
@@ -169,7 +168,7 @@ function ProjectCard({ project, onImageClick }) {
 
           {/* Links */}
           {(project.liveUrl || repositoryUrl) && (
-            <div className="flex gap-4 mt-auto pt-3 border-t border-slate-100 dark:border-zinc-700/50">
+            <div className="project-actions flex gap-4 mt-auto pt-3 border-t border-slate-100 dark:border-zinc-700/50">
               {project.liveUrl && (
                 <a
                   href={project.liveUrl}
@@ -203,6 +202,8 @@ export default function Projects() {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.05 });
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [requestVersion, setRequestVersion] = useState(0);
   const [lightbox, setLightbox] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const sectionRef = useRef(null);
@@ -210,18 +211,25 @@ export default function Projects() {
   const trackRef = useRef(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const loadProjects = async () => {
+      setLoading(true);
+      setError(false);
       try {
-        const liveProjects = await fetchProjectsFromFruitask();
-        setProjects(liveProjects && liveProjects.length > 0 ? liveProjects : fallbackProjects);
+        const liveProjects = await fetchProjectsFromFruitask(controller.signal);
+        if (!controller.signal.aborted) setProjects(liveProjects);
       } catch {
-        setProjects(fallbackProjects);
+        if (!controller.signal.aborted) {
+          setProjects([]);
+          setError(true);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
     loadProjects();
-  }, []);
+    return () => controller.abort();
+  }, [requestVersion]);
 
   useEffect(() => {
     if (loading || projects.length < 2) return;
@@ -322,6 +330,11 @@ export default function Projects() {
           {loading ? (
             <div className="flex justify-center items-center py-16">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-300 dark:border-zinc-600" />
+            </div>
+          ) : error ? (
+            <div role="alert" className="glass-panel rounded-xl px-6 py-8 text-center text-slate-600 dark:text-zinc-300">
+              <p>Projects are temporarily unavailable.</p>
+              <button type="button" onClick={() => setRequestVersion((version) => version + 1)} className="mt-4 text-sm font-semibold underline underline-offset-4 hover:text-slate-900 dark:hover:text-white">Try again</button>
             </div>
           ) : projects.length === 0 ? (
             <p className="text-sm text-slate-400 dark:text-zinc-500 py-8">No projects found.</p>
