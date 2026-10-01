@@ -81,7 +81,7 @@ npm run build
 npx wrangler deploy
 ```
 
-Before using live Contact and Projects data, add `FRUITASK_API_KEY`, `FRUITASK_WORKSPACE_TOKEN`, and `FRUITASK_PROJECTS_WORKSPACE_TOKEN` as **runtime secrets** on the `web` Worker in Cloudflare's Variables and Secrets settings. Add `FRUITASK_TABLE_NAME` there as a runtime variable with the exact Contact table API name. The local `.env` is ignored by Git and is not deployed. Wrangler requires the Projects API key and workspace token for deployment, so missing Projects bindings are caught before release. If Contact bindings are missing, the Worker returns a configuration error to the form without exposing credentials. Do not put credentials in Cloudflare build variables or `wrangler.jsonc`.
+Before using live Contact and Projects data, add `FRUITASK_API_KEY`, `FRUITASK_WORKSPACE_TOKEN`, and `FRUITASK_PROJECTS_WORKSPACE_TOKEN` as **runtime secrets** on the `web` Worker in Cloudflare's Variables and Secrets settings. Add `FRUITASK_TABLE_NAME` there as a runtime variable with the exact Contact table API name. The local `.env` is ignored by Git and is not deployed. If Projects bindings are missing, `/api/projects` returns 503 and the page shows fallback projects; if Contact bindings are missing, the Worker returns a configuration error to the form without exposing credentials. Do not put credentials in Cloudflare build variables or `wrangler.jsonc`.
 
 ## Theme and motion
 
