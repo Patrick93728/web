@@ -7,11 +7,12 @@ export class ProjectsError extends Error {
 
 export function mapProjectRows(rows) {
   if (!Array.isArray(rows)) return [];
-  return rows.map((row) => {
-    const cells = row.cells || {};
+  return rows.filter((row) => row && typeof row === 'object').map((row) => {
+    const cells = row.cells && typeof row.cells === 'object' ? row.cells : {};
     const getVal = (name) => cells[name]?.value;
     const imageVal = getVal('image');
-    const images = Array.isArray(imageVal) ? imageVal.map((image) => image.url) : [];
+    const images = Array.isArray(imageVal) ? imageVal.map((image) => image?.url).filter(Boolean) : [];
+    const repository = getVal('Repository Link');
     return {
       id: getVal('Project ID') || row.id,
       title: getVal('Title') || 'Untitled Project',
@@ -23,7 +24,7 @@ export function mapProjectRows(rows) {
       images,
       image: images[0] || null,
       liveUrl: getVal('Live Demo Link') || null,
-      repoUrl: getVal('Repository Link') || null,
+      repoUrl: typeof repository === 'string' ? repository.trim() || null : null,
     };
   }).filter((project) => project.title !== 'Untitled Project');
 }

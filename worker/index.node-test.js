@@ -72,3 +72,21 @@ test('serves Projects through the Worker without exposing API credentials', asyn
     globalThis.fetch = originalFetch;
   }
 });
+
+test('returns 200 with projects that have no repository cell', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => Response.json({ data: { rows: [
+    { id: 'with-repo', cells: { Title: { value: 'With repository' }, 'Repository Link': { value: 'https://github.com/example/project' } } },
+    { id: 'without-repo', cells: { Title: { value: 'Without repository' } } },
+  ] } });
+  try {
+    const response = await worker.fetch(new Request('https://example.com/api/projects'), env);
+    assert.equal(response.status, 200);
+    const { projects } = await response.json();
+    assert.equal(projects.length, 2);
+    assert.equal(projects[0].repoUrl, 'https://github.com/example/project');
+    assert.equal(projects[1].repoUrl, null);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

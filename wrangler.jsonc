@@ -1,8 +1,11 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "website-profile",
+  "name": "web",
   "main": "./worker/index.js",
   "compatibility_date": "2026-10-01",
+  "secrets": {
+    "required": ["FRUITASK_API_KEY", "FRUITASK_PROJECTS_WORKSPACE_TOKEN"]
+  },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",

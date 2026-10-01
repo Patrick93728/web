@@ -2,7 +2,7 @@
 
 Patrick Tomol's portfolio is an existing React 19 and Tailwind CSS v4 project. Its content lives in the React components and `src/data/`; the current redesign keeps the existing portfolio sections while replacing the Contact form and inquiry flow.
 
-**Public site:** [website-profile.tomolpatrick.workers.dev](https://website-profile.tomolpatrick.workers.dev/)
+**Public site:** [web.tomolpatrick.workers.dev](https://web.tomolpatrick.workers.dev/)
 
 Local edits do not appear on the public site until they are deployed.
 
@@ -73,7 +73,7 @@ npm run build
 
 ## Deploy to Cloudflare Workers
 
-The Wrangler CLI is pinned in `package-lock.json`, and `wrangler.jsonc` deploys the Vite build plus the Contact API Worker under the existing `website-profile` Worker name. Cloudflare Workers Builds should use `npm run build` as the build command and `npx wrangler deploy` as the deploy command. The equivalent local commands are:
+The Wrangler CLI is pinned in `package-lock.json`, and `wrangler.jsonc` deploys the Vite build plus the API Worker under the `web` Worker name used by the public URL. Cloudflare Workers Builds should use `npm run build` as the build command and `npx wrangler deploy` as the deploy command. The equivalent local commands are:
 
 ```bash
 npm ci
@@ -81,7 +81,7 @@ npm run build
 npx wrangler deploy
 ```
 
-Before using live Contact and Projects data, add `FRUITASK_API_KEY`, `FRUITASK_WORKSPACE_TOKEN`, and `FRUITASK_PROJECTS_WORKSPACE_TOKEN` as **runtime secrets** on the `website-profile` Worker in Cloudflare's Variables and Secrets settings. Add `FRUITASK_TABLE_NAME` there as a runtime variable with the exact Contact table API name. The local `.env` is ignored by Git and is not deployed. If the Contact bindings are missing, the Worker returns a configuration error to the form without exposing credentials. If Projects bindings are missing, the existing fallback projects are displayed. Do not put credentials in Cloudflare build variables or `wrangler.jsonc`.
+Before using live Contact and Projects data, add `FRUITASK_API_KEY`, `FRUITASK_WORKSPACE_TOKEN`, and `FRUITASK_PROJECTS_WORKSPACE_TOKEN` as **runtime secrets** on the `web` Worker in Cloudflare's Variables and Secrets settings. Add `FRUITASK_TABLE_NAME` there as a runtime variable with the exact Contact table API name. The local `.env` is ignored by Git and is not deployed. Wrangler requires the Projects API key and workspace token for deployment, so missing Projects bindings are caught before release. If Contact bindings are missing, the Worker returns a configuration error to the form without exposing credentials. Do not put credentials in Cloudflare build variables or `wrangler.jsonc`.
 
 ## Theme and motion
 

@@ -94,6 +94,7 @@ function ProjectCard({ project, onImageClick }) {
     ? project.images
     : project.image ? [project.image] : [];
   const hasImages = allImages.length > 0;
+  const repositoryUrl = typeof project.repoUrl === 'string' ? project.repoUrl.trim() : '';
 
   return (
     <div className="h-full">
@@ -167,7 +168,7 @@ function ProjectCard({ project, onImageClick }) {
           )}
 
           {/* Links */}
-          {(project.liveUrl || project.repoUrl) && (
+          {(project.liveUrl || repositoryUrl) && (
             <div className="flex gap-4 mt-auto pt-3 border-t border-slate-100 dark:border-zinc-700/50">
               {project.liveUrl && (
                 <a
@@ -179,9 +180,9 @@ function ProjectCard({ project, onImageClick }) {
                   <ExternalLink size={13} aria-hidden="true" /> Live Demo
                 </a>
               )}
-              {project.repoUrl && (
+              {repositoryUrl && (
                 <a
-                  href={project.repoUrl}
+                  href={repositoryUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm md:text-base font-medium text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors ml-auto"

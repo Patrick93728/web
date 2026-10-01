@@ -29,6 +29,22 @@ test('maps only project display fields from Fruitask rows', () => {
   }]);
 });
 
+test('keeps projects when repository cells are missing, null, empty, or present', () => {
+  const repositoryValues = [undefined, null, '', '   ', ' https://github.com/example/project '];
+  const rows = repositoryValues.map((value, index) => ({
+    id: `row-${index}`,
+    cells: {
+      Title: { value: `Project ${index}` },
+      ...(value === undefined ? {} : { 'Repository Link': { value } }),
+    },
+  }));
+  const projects = mapProjectRows(rows);
+  assert.equal(projects.length, rows.length);
+  assert.deepEqual(projects.map((project) => project.repoUrl), [
+    null, null, null, null, 'https://github.com/example/project',
+  ]);
+});
+
 test('fetches project rows with server-only credentials', async () => {
   let outgoing;
   const projects = await loadProjects({
