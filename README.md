@@ -102,6 +102,6 @@ FRUITASK_TABLE_NAME=your_table_api_name
 FRUITASK_PROJECTS_WORKSPACE_TOKEN=your_projects_workspace_token
 ```
 
-The contact form writes only `Name`, `Email`, `Subject`, and `Message` to the matching Fruitask columns. `Status` and `Date Received` stay managed by the table, so visitors do not fill them in. There is no Budget Range field or column. No Fruitask credential is sent to the React client. Until the server variables are configured, submissions return a clear error and the email and WhatsApp contact links remain available. Live table writes have not been tested without the real credentials.
+The contact form writes `Name`, `Email`, `Subject`, and `Message` to the matching Fruitask columns. The server also writes `Date Received` as the submission date in Philippine time; visitors do not fill it in. `Status` stays managed by the table. There is no Budget Range field or column. No Fruitask credential is sent to the React client. Until the server variables are configured, submissions return a clear error and the email and WhatsApp contact links remain available. Live table writes have not been tested without creating a real inquiry.
 
 The Projects and Contact workspace tokens can differ. Neither token nor the API key is read by the React frontend. Rotate any credentials previously deployed in `VITE_` variables, since older browser bundles may still contain them.

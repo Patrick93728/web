@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { formatReceivedDate } from '../server/contact.js';
 import worker from './index.js';
 
 const env = {
@@ -37,6 +38,7 @@ test('validates and forwards contact inquiries with server-only credentials', as
     assert.equal(outgoing.headers['X-API-Key'], env.FRUITASK_API_KEY);
     assert.deepEqual(JSON.parse(outgoing.body).cells, {
       Name: 'Pat Example', Email: 'pat@example.com', Subject: 'Website Development', Message: 'A booking site.',
+      'Date Received': formatReceivedDate(new Date()),
     });
   } finally {
     globalThis.fetch = originalFetch;

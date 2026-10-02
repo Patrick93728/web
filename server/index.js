@@ -72,4 +72,5 @@ const server = createServer(async (request, response) => {
 });
 
 const port = Number(process.env.PORT || 8787);
-server.listen(port, () => console.log(`Portfolio server listening on http://localhost:${port}`));
+const host = process.env.PORTFOLIO_API_HOST;
+server.listen(port, host, () => console.log(`Portfolio server listening on http://${host || 'localhost'}:${port}`));

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { afterEach, test } from 'node:test';
-import { handleContact } from './contact.js';
+import { formatReceivedDate, handleContact } from './contact.js';
 
 const values = {
   name: 'Pat Example',
@@ -51,9 +51,14 @@ test('sends validated inquiry through the server with secrets only in the Fruita
     Email: values.email,
     Subject: values.subject,
     Message: values.message,
+    'Date Received': formatReceivedDate(new Date()),
   });
   assert.equal(JSON.stringify(result).includes(env.FRUITASK_API_KEY), false);
   assert.equal(JSON.stringify(result).includes(env.FRUITASK_WORKSPACE_TOKEN), false);
+});
+
+test('records the date in Philippine time across the UTC day boundary', () => {
+  assert.equal(formatReceivedDate(new Date('2026-10-01T17:30:00Z')), '2026-10-02');
 });
 
 test('rejects missing fields before calling Fruitask', async () => {

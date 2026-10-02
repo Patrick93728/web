@@ -2,6 +2,17 @@ import { contactSubjects } from '../shared/contactOptions.js';
 
 const SUBJECTS = new Set(contactSubjects);
 const MAX_BODY_BYTES = 16_384;
+const RECEIVED_DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Asia/Manila',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+export function formatReceivedDate(date) {
+  const parts = Object.fromEntries(RECEIVED_DATE_FORMAT.formatToParts(date).map(({ type, value }) => [type, value]));
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
 
 function validateText(value, label, maximum) {
   if (typeof value !== 'string' || !value.trim()) throw new ContactError(400, `${label} is required.`);
@@ -37,6 +48,7 @@ export async function saveContact(values, env = process.env, fetchRequest = fetc
     Email: values.email,
     Subject: values.subject,
     Message: values.message,
+    'Date Received': formatReceivedDate(new Date()),
   };
   const url = `https://integrations.fruitask.com/${encodeURIComponent(table)}/${encodeURIComponent(token)}/rows`;
   let response;

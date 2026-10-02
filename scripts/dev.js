@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 const serverPath = fileURLToPath(new URL('../server/index.js', import.meta.url));
 const vitePath = fileURLToPath(new URL('../node_modules/vite/bin/vite.js', import.meta.url));
-const api = spawn(process.execPath, [serverPath], { stdio: 'inherit', env: { ...process.env, PORT: '8787' } });
+const api = spawn(process.execPath, [serverPath], { stdio: 'inherit', env: { ...process.env, PORT: '8787', PORTFOLIO_API_HOST: '127.0.0.1' } });
 const vite = spawn(process.execPath, [vitePath, '--host', '127.0.0.1'], { stdio: 'inherit' });
 
 function stop() {
