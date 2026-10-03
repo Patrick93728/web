@@ -4,6 +4,7 @@
   "main": "./worker/index.js",
   "compatibility_date": "2026-10-01",
   "vars": {
+    "FRUITASK_CERTIFICATES_TABLE_NAME": "Certificates",
     "FRUITASK_TABLE_NAME": "Table 1"
   },
   "assets": {
