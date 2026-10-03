@@ -50,8 +50,7 @@ export default function About() {
               {siteConfig.resumeUrl && (
                 <a
                   href={siteConfig.resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  download="PATRICK_TOMOL_RESUME.pdf"
                   className="mt-2 self-start inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-zinc-100 text-white dark:text-slate-900 font-semibold text-sm hover:bg-slate-700 dark:hover:bg-white transition-colors shadow-sm"
                 >
                   <FileDown size={15} /> Download Resume

@@ -18,6 +18,6 @@
     'Explore web development, mobile app development, UI/UX design, integrations, and practical digital solutions for businesses, startups, and individuals.',
 
   // â”€â”€ Resume â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  resumeUrl: 'https://fileko.fruitask.com/files/e91e802a-a7c2-4c30-b8ac-caaf9a7a1c1d',
+  resumeUrl: '/PATRICK_TOMOL_RESUME.pdf',
 };
 
