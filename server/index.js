@@ -5,6 +5,7 @@ import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { handleContact } from './contact.js';
 import { handleProjects } from './projects.js';
+import { handleCertificates } from './certificates.js';
 
 const projectRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const distRoot = resolve(projectRoot, 'dist');
@@ -31,6 +32,10 @@ const server = createServer(async (request, response) => {
   }
   if (pathname === '/api/projects') {
     await handleProjects(request, response);
+    return;
+  }
+  if (pathname === '/api/certificates') {
+    await handleCertificates(request, response);
     return;
   }
   if (request.method !== 'GET' && request.method !== 'HEAD') {

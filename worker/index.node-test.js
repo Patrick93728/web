@@ -8,6 +8,7 @@ const env = {
   FRUITASK_WORKSPACE_TOKEN: 'test-only-token',
   FRUITASK_TABLE_NAME: 'Table 1',
   FRUITASK_PROJECTS_WORKSPACE_TOKEN: 'test-projects-token',
+  FRUITASK_CERTIFICATES_WORKSPACE_TOKEN: 'test-certificates-token',
   ASSETS: { fetch: async () => new Response('portfolio asset') },
 };
 
@@ -87,6 +88,30 @@ test('returns 200 with projects that have no repository cell', async () => {
     const { projects } = await response.json();
     assert.equal(projects.length, 2);
     assert.ok(projects.every((project) => !Object.hasOwn(project, 'repoUrl')));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('serves certificate records and images without exposing Fruitask credentials', async () => {
+  const originalFetch = globalThis.fetch;
+  let outgoing;
+  globalThis.fetch = async (url, init) => {
+    outgoing = { url, ...init };
+    return Response.json({ data: { rows: [{ id: 'certificate-1', cells: {
+      'Certificate Name': { value: 'Example Certificate' },
+      Issuer: { value: 'Example Issuer' },
+      'Certificate Image': { value: [{ url: 'https://example.com/certificate.png' }] },
+    } }] } });
+  };
+  try {
+    const response = await worker.fetch(new Request('https://example.com/api/certificates'), env);
+    assert.equal(response.status, 200);
+    const result = await response.json();
+    assert.equal(result.certificates[0].image, 'https://example.com/certificate.png');
+    assert.equal(outgoing.url, 'https://integrations.fruitask.com/Certificates/test-certificates-token/rows?limit=200');
+    assert.equal(outgoing.headers['X-API-Key'], env.FRUITASK_API_KEY);
+    assert.equal(JSON.stringify(result).includes(env.FRUITASK_CERTIFICATES_WORKSPACE_TOKEN), false);
   } finally {
     globalThis.fetch = originalFetch;
   }

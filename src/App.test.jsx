@@ -2,7 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import App from './App';
 
-vi.mock('./services/fruitask', () => ({ fetchProjectsFromFruitask: vi.fn().mockResolvedValue([]) }));
+vi.mock('./services/fruitask', () => ({
+  fetchProjectsFromFruitask: vi.fn().mockResolvedValue([]),
+  fetchCertificatesFromFruitask: vi.fn().mockResolvedValue([]),
+}));
 
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -35,6 +38,18 @@ describe('App', () => {
   it('renders the About heading', () => {
     render(<App />);
     expect(screen.getByRole('heading', { name: /Hi, I'm Patrick/i })).toBeInTheDocument();
+  });
+
+  it('renders About, Tech Stack, Certificates, then Contact', () => {
+    render(<App />);
+    expect(screen.getByRole('heading', { name: 'Certificates.' })).toBeInTheDocument();
+    const about = document.querySelector('#about');
+    const tech = document.querySelector('#tech');
+    const certificates = document.querySelector('#certificates');
+    const contact = document.querySelector('#contact');
+    expect(about.compareDocumentPosition(tech) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(tech.compareDocumentPosition(certificates) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(certificates.compareDocumentPosition(contact) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('renders the TechStack heading', () => {

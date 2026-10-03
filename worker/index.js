@@ -1,5 +1,6 @@
 import { ContactError, saveContact, validateContact } from '../server/contact.js';
 import { loadProjects, ProjectsError } from '../server/projects.js';
+import { loadCertificates, CertificatesError } from '../server/certificates.js';
 
 const MAX_BODY_BYTES = 16_384;
 const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
@@ -47,6 +48,14 @@ export default {
         return jsonResponse(200, { projects: await loadProjects(env) });
       } catch (error) {
         return jsonResponse(error instanceof ProjectsError ? error.status : 500, { error: 'Project data is unavailable.' });
+      }
+    }
+    if (pathname === '/api/certificates') {
+      if (request.method !== 'GET') return jsonResponse(405, { error: 'Method not allowed.' }, { Allow: 'GET' });
+      try {
+        return jsonResponse(200, { certificates: await loadCertificates(env) });
+      } catch (error) {
+        return jsonResponse(error instanceof CertificatesError ? error.status : 500, { error: 'Certificate data is unavailable.' });
       }
     }
     if (pathname !== '/api/contact') {

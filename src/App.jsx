@@ -4,6 +4,7 @@ import Hero from './components/Hero';
 import Services from './components/Services';
 import Projects from './components/Projects';
 import About from './components/About';
+import Certificates from './components/Certificates';
 import TechStack from './components/TechStack';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
@@ -86,6 +87,7 @@ function App() {
         <Projects />
         <About />
         <TechStack />
+        <Certificates />
         <Contact />
       </main>
       <Footer />

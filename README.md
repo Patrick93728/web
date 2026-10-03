@@ -81,7 +81,7 @@ npm run build
 npx wrangler deploy
 ```
 
-Before using live Contact and Projects data, add `FRUITASK_API_KEY`, `FRUITASK_WORKSPACE_TOKEN`, and `FRUITASK_PROJECTS_WORKSPACE_TOKEN` as **runtime secrets** on the `web` Worker in Cloudflare's Variables and Secrets settings. Add `FRUITASK_TABLE_NAME` there as a runtime variable with the exact Contact table API name. The local `.env` is ignored by Git and is not deployed. If Projects bindings are missing, `/api/projects` returns 503 and the page shows the existing projects from `src/data/projects.js`; if Contact bindings are missing, the Worker returns a configuration error to the form without exposing credentials. Do not put credentials in Cloudflare build variables or `wrangler.jsonc`.
+Before using live Contact, Projects, and Certificates data, add `FRUITASK_API_KEY`, `FRUITASK_WORKSPACE_TOKEN`, `FRUITASK_PROJECTS_WORKSPACE_TOKEN`, and `FRUITASK_CERTIFICATES_WORKSPACE_TOKEN` as **runtime secrets** on the `web` Worker in Cloudflare's Variables and Secrets settings. Add `FRUITASK_TABLE_NAME` there as a runtime variable with the exact Contact table API name. The Certificates endpoint uses the `Certificates` table by default; set `FRUITASK_CERTIFICATES_TABLE_NAME` only if its API table name differs. The local `.env` is ignored by Git and is not deployed. If Projects or Certificates bindings are missing, their API endpoints return 503 and the page shows the existing local records; if Contact bindings are missing, the Worker returns a configuration error to the form without exposing credentials. Do not put credentials in Cloudflare build variables or `wrangler.jsonc`.
 
 ## Theme and motion
 
@@ -100,6 +100,7 @@ FRUITASK_API_KEY=your_private_key
 FRUITASK_WORKSPACE_TOKEN=your_workspace_token
 FRUITASK_TABLE_NAME=your_table_api_name
 FRUITASK_PROJECTS_WORKSPACE_TOKEN=your_projects_workspace_token
+FRUITASK_CERTIFICATES_WORKSPACE_TOKEN=your_certificates_workspace_token
 ```
 
 The contact form writes `Name`, `Email`, `Subject`, and `Message` to the matching Fruitask columns. The server also writes `Date Received` as the submission date in Philippine time; visitors do not fill it in. `Status` stays managed by the table. There is no Budget Range field or column. No Fruitask credential is sent to the React client. Until the server variables are configured, submissions return a clear error and the email and WhatsApp contact links remain available. Live table writes have not been tested without creating a real inquiry.
